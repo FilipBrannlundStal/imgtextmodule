@@ -37,6 +37,7 @@ class Imgtextmodule extends Module
         $this->version = '1.0.0';
         $this->author = 'Filip Brännlund Stål';
         $this->need_instance = 0;
+        $this->validFileTypes = array('jpg', 'png', 'gif');
 
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
@@ -81,11 +82,10 @@ class Imgtextmodule extends Module
          */
         if (((bool)Tools::isSubmit('submitImgtextmoduleModule')) == true) {
             $target = __DIR__.'/views/img/'.basename($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["name"]);
-            $validFileTypes = array('jpg', 'png', 'gif');
             /**
              * Check if file has valid EXT
              */
-            if (!in_array(pathinfo($target,PATHINFO_EXTENSION), $validFileTypes))
+            if (!in_array(pathinfo($target,PATHINFO_EXTENSION), $this->validFileTypes))
             {
                 return $this->displayError($this->l('Error, valid filetypes: jpg, png & gif.')).$this->renderForm();
             }
