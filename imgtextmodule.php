@@ -80,35 +80,29 @@ class Imgtextmodule extends Module
          * If values have been submitted in the form, process.
          */
         if (((bool)Tools::isSubmit('submitImgtextmoduleModule')) == true) {
-            /**
-             * Check if file exist
-             */
             $target = __DIR__.'/views/img/'.basename($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["name"]);
-            $html = '';
-            if (!file_exists($target)) 
-            {   
-                /**
-                 * Check if file is an image
-                 */
-                $imageFileType = pathinfo($target,PATHINFO_EXTENSION);
-                if ($imageFileType == "jpg" or $imageFileType == "png" or $imageFileType == "gif")
-                {
-                    move_uploaded_file($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["tmp_name"], $target);
-                    $html .= $this->displayConfirmation($this->l('Settings has been updated!'));
-                    $this->postProcess();
-                }
-                else
-                {
-                    $html .= $this->displayError($this->l('Error, valid filetypes: jpg, png & gif.'));
-                }
-            }
-            else 
+            $validFileTypes = array('jpg', 'png', 'gif');
+            /**
+             * Check if file has valid EXT
+             */
+            if (!in_array(pathinfo($target,PATHINFO_EXTENSION), $validFileTypes))
             {
-                $html .= $this->displayError($this->l('File already exist!'));
+                return $this->displayError($this->l('Error, valid filetypes: jpg, png & gif.')).$this->renderForm();
             }
+            /**
+             * Check if file exists
+             */
+            if (file_exists($target)) 
+            { 
+                $html = $this->displayError($this->l('File already exist!'));
+                return $this->displayError($this->l('File already exist!')).$this->renderForm();
+            }
+            move_uploaded_file($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["tmp_name"], $target);
+            $this->postProcess();
+            return $this->displayConfirmation($this->l('Settings has been updated!')).$this->renderForm();
             
         }
-        return $html.$this->renderForm();
+        return $this->renderForm();
     }
 
     /**
@@ -176,7 +170,7 @@ class Imgtextmodule extends Module
                         'desc' => $this->l('Choose a image'),
                         'name' => 'IMGTEXTMODULE_ACCOUNT_IMAGE',
                         'label' => $this->l('Image'),
-                        'required' => 'required',
+                        'required' => true,
                     ),
                 ),
                 'submit' => array(
