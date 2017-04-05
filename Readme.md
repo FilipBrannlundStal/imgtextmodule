@@ -1,1 +1,1 @@
-# ImageTextModule
+# ImageTextModule prestashop module
