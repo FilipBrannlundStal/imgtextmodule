@@ -23,19 +23,15 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-global $smarty;
-
 class Imgtextmodule extends Module
 {
     protected $config_form = false;
 
     public function __construct()
     {
-        $this->test = 'nolla';
         $this->name = 'imgtextmodule';
         $this->tab = 'administration';
         $this->version = '1.0.0';
@@ -51,7 +47,6 @@ class Imgtextmodule extends Module
 
         $this->displayName = $this->l('ImageTextModule');
         $this->description = $this->l('Module for Prestaworks');
-
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
@@ -85,14 +80,35 @@ class Imgtextmodule extends Module
          * If values have been submitted in the form, process.
          */
         if (((bool)Tools::isSubmit('submitImgtextmoduleModule')) == true) {
-            $this->postProcess();
+            /**
+             * Check if file exist
+             */
+            $target = __DIR__.'/views/img/'.basename($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["name"]);
+            $html = '';
+            if (!file_exists($target)) 
+            {   
+                /**
+                 * Check if file is an image
+                 */
+                $imageFileType = pathinfo($target,PATHINFO_EXTENSION);
+                if ($imageFileType == "jpg" or $imageFileType == "png" or $imageFileType == "gif")
+                {
+                    move_uploaded_file($_FILES["IMGTEXTMODULE_ACCOUNT_IMAGE"]["tmp_name"], $target);
+                    $html .= $this->displayConfirmation($this->l('Settings has been updated!'));
+                    $this->postProcess();
+                }
+                else
+                {
+                    $html .= $this->displayError($this->l('Error, valid filetypes: jpg, png & gif.'));
+                }
+            }
+            else 
+            {
+                $html .= $this->displayError($this->l('File already exist!'));
+            }
+            
         }
-
-        $this->context->smarty->assign('module_dir', $this->_path);
-
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
-
-        return $output.$this->renderForm();
+        return $html.$this->renderForm();
     }
 
     /**
@@ -140,7 +156,7 @@ class Imgtextmodule extends Module
                     array(
                         'col' => 3,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
+                        'prefix' => '<i class="icon icon-mobile"></i>',
                         'desc' => $this->l('Text display on mobile device'),
                         'name' => 'IMGTEXTMODULE_ACCOUNT_MOBILE',
                         'label' => $this->l('Mobile'),
@@ -148,7 +164,7 @@ class Imgtextmodule extends Module
                     array(
                         'col' => 3,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
+                        'prefix' => '<i class="icon icon-desktop"></i>',
                         'desc' => $this->l('Text display on desktop device'),
                         'name' => 'IMGTEXTMODULE_ACCOUNT_DESKTOP',
                         'label' => $this->l('Desktop'),
@@ -160,6 +176,7 @@ class Imgtextmodule extends Module
                         'desc' => $this->l('Choose a image'),
                         'name' => 'IMGTEXTMODULE_ACCOUNT_IMAGE',
                         'label' => $this->l('Image'),
+                        'required' => 'required',
                     ),
                 ),
                 'submit' => array(
@@ -174,10 +191,9 @@ class Imgtextmodule extends Module
      */
     protected function getConfigFormValues()
     {
-        $this->test = 'changed';
         return array(
             'IMGTEXTMODULE_LIVE_MODE' => Configuration::get('IMGTEXTMODULE_LIVE_MODE', true),
-            'IMGTEXTMODULE_ACCOUNT_MOBILE' => Configuration::get('IMGTEXTMODULE_ACCOUNT_MOBILE', 'contact@prestashop.com'),
+            'IMGTEXTMODULE_ACCOUNT_MOBILE' => Configuration::get('IMGTEXTMODULE_ACCOUNT_MOBILE', null),
             'IMGTEXTMODULE_ACCOUNT_DESKTOP' => Configuration::get('IMGTEXTMODULE_ACCOUNT_DESKTOP', null),
             'IMGTEXTMODULE_ACCOUNT_IMAGE' => Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null),
         );
@@ -188,8 +204,6 @@ class Imgtextmodule extends Module
      */
     protected function postProcess()
     {
-
-        //$this->uploadImage();
         $form_values = $this->getConfigFormValues();
         foreach (array_keys($form_values) as $key) {
             Configuration::updateValue($key, Tools::getValue($key));
@@ -220,9 +234,17 @@ class Imgtextmodule extends Module
 
     public function hookDisplayFooter()
     {
-        /* Place your code here. */
-        move_uploaded_file(Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null), $this->_path.'/'.Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null));
-        echo '----';
-        return Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null);
+        /* Place your code here. */        
+        $html = '';
+        /*$html .= '<img src="' . $this->_path.'/views/img/' .Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null) . '">';
+        return $html;*/
+        // ta bort?
+        $this->context->smarty->assign('mobile',Configuration::get('IMGTEXTMODULE_ACCOUNT_MOBILE', null));
+        $this->context->smarty->assign('desktop',Configuration::get('IMGTEXTMODULE_ACCOUNT_DESKTOP', null));
+        $this->context->smarty->assign('image',_PS_BASE_URL_.$this->_path.'views/img/' .Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null));
+        $this->context->smarty->assign('module_dir', $this->_path);
+        $output = $this->context->smarty->fetch($this->local_path.'views/templates/front/footer22.tpl');
+        //return $output.$this->renderForm();
+        return $output;
     }
 }

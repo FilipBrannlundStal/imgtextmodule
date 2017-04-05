@@ -25,3 +25,25 @@
 * Don't forget to prefix your containers with your own identifier
 * to avoid any conflicts with others containers.
 */
+
+/**
+* Hiding both elements
+*/
+.mobileShow { display: none;}
+.desktopShow { display: none;}
+/**
+* Depending on screen size different element will appear
+*/
+@media only screen
+   and (max-device-width : 480px){ .mobileShow { display: inline;} .img-over { font-size: 150%; text-align: center;}}
+@media only screen
+   and (min-device-width : 480px){  .desktopShow { display: inline;} .img-over { font-size: 80%;}}
+
+
+/**
+* MISCS for text over image
+*/
+.img-over { position: absolute; top: 50%; background: white; opacity: 0.9; width: 100%;}
+
+.img-footer { width: 100%; height: auto;}
+
