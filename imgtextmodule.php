@@ -243,7 +243,7 @@ class Imgtextmodule extends Module
         $this->context->smarty->assign('desktop',Configuration::get('IMGTEXTMODULE_ACCOUNT_DESKTOP', null));
         $this->context->smarty->assign('image',_PS_BASE_URL_.$this->_path.'views/img/' .Configuration::get('IMGTEXTMODULE_ACCOUNT_IMAGE', null));
         $this->context->smarty->assign('module_dir', $this->_path);
-        $output = $this->context->smarty->fetch($this->local_path.'views/templates/front/footer22.tpl');
+        $output = $this->context->smarty->fetch($this->local_path.'views/templates/front/rightFooter.tpl');
         //return $output.$this->renderForm();
         return $output;
     }
